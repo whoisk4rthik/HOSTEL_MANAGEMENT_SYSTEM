@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Visitor Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Visitor Management</h1>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Register New Visitor</h3>
+    </div>
+    <div class="card-body">
+        <form method="POST" class="visitor-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Visitor Name</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="text" id="phone" name="phone" class="form-control" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="relation">Relation</label>
+                    <select id="relation" name="relation" class="form-control" required>
+                        <option value="Father">Father</option>
+                        <option value="Mother">Mother</option>
+                        <option value="Brother">Brother</option>
+                        <option value="Sister">Sister</option>
+                        <option value="Uncle">Uncle</option>
+                        <option value="Aunt">Aunt</option>
+                        <option value="Cousin">Cousin</option>
+                        <option value="Friend">Friend</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="visit_date">Visit Date</label>
+                    <input type="date" id="visit_date" name="visit_date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="out_date">Out Date</label>
+                    <input type="date" id="out_date" name="out_date" class="form-control" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Register Visitor</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Visitor History</h3>
+    </div>
+    <div class="card-body">
+        {% if visitors %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Relation</th>
+                    <th>Visit Date</th>
+                    <th>Out Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visitor in visitors %}
+                <tr>
+                    <td>{{ visitor.Visitor_Name }}</td>
+                    <td>{{ visitor.Ph_no }}</td>
+                    <td>{{ visitor.Relation_to_student }}</td>
+                    <td>{{ visitor.VisitDate }}</td>
+                    <td>{{ visitor.OutDate }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No visitor records found</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

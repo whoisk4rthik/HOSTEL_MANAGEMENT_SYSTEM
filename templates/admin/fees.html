@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}All Fees & Payments{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Fees & Payments</h1>
+    <div class="header-actions">
+        <form method="GET" class="filter-form">
+            <label for="status">Filter by Status:</label>
+            <select id="status" name="status" class="form-control" onchange="this.form.submit()">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                <option value="Paid" {% if status_filter == 'Paid' %}selected{% endif %}>Paid</option>
+                <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Overdue" {% if status_filter == 'Overdue' %}selected{% endif %}>Overdue</option>
+            </select>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if fees %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>P.ID</th>
+                        <th>Student</th>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fee in fees %}
+                    <tr>
+                        <td>#{{ fee.Payment_ID }}</td>
+                        <td>{{ fee.FirstName }} {{ fee.LastName }} (ID: {{ fee.Student_ID }})</td>
+                        <td>{{ fee.PaymentDate }}</td>
+                        <td>{{ fee.Type }}</td>
+                        <td>₹{{ "%.2f"|format(fee.FeesAmount) }}</td>
+                        <td><span class="badge badge-{{ fee.Status|lower }}">{{ fee.Status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No fee records found for the selected filter.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

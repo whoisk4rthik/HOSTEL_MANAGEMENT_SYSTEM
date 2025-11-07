@@ -1,0 +1,14 @@
+# --- Python Environment and Cache ---
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# --- Application Secrets (CRITICAL: Do NOT upload your password) ---
+# This ignores the file containing your MySQL credentials and SECRET_KEY
+.env
+*.key
+
+# --- IDE and Log Files ---
+*.log
+.vscode/

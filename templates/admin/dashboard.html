@@ -1,0 +1,642 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 16px; margin-bottom: 30px; color: white; box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);">
+    <h1 style="font-size: 2.5rem; margin-bottom: 10px; font-weight: 700;">👔 Admin Dashboard</h1>
+    <p style="font-size: 1.1rem; opacity: 0.95;">Hostel Management Overview</p>
+</div>
+
+<!-- Flash Messages - Always visible at top -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div style="position: sticky; top: 0; z-index: 999; margin-bottom: 20px;">
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" style="margin-bottom: 10px; font-size: 1.1rem; padding: 20px; animation: slideDown 0.3s ease-out; border-radius: 12px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 40px;">
+    <div class="stat-card-modern" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="stat-icon" style="font-size: 3rem;">👨‍🎓</div>
+        <div class="stat-info">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 8px;">Total Students</h3>
+            <p class="stat-value" style="font-size: 2.5rem; font-weight: 700;">{{ total_students }}</p>
+        </div>
+    </div>
+
+    <div class="stat-card-modern" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="stat-icon" style="font-size: 3rem;">🏢</div>
+        <div class="stat-info">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 8px;">Occupied Rooms</h3>
+            <p class="stat-value" style="font-size: 2.5rem; font-weight: 700;">{{ occupied_rooms }}/{{ total_rooms }}</p>
+        </div>
+    </div>
+
+    <div class="stat-card-modern" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+        <div class="stat-icon" style="font-size: 3rem;">💵</div>
+        <div class="stat-info">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 8px;">Pending Fees</h3>
+            <p class="stat-value" style="font-size: 2.5rem; font-weight: 700;">₹{{ "%.2f"|format(pending_fees) }}</p>
+        </div>
+    </div>
+
+    <div class="stat-card-modern" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+        <div class="stat-icon" style="font-size: 3rem;">📊</div>
+        <div class="stat-info">
+            <h3 style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 8px;">Occupancy Rate</h3>
+            <p class="stat-value" style="font-size: 2.5rem; font-weight: 700;">{{ "%.1f"|format((occupied_rooms/total_rooms*100) if total_rooms > 0 else 0) }}%</p>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Button -->
+<div class="page-header" style="margin-top: 40px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+    <h2 style="font-size: 1.8rem; font-weight: 700; color: #1e293b;">All Students</h2>
+    <button onclick="openAddStudentModal()" class="btn-modern btn-modern-primary">
+        <span style="font-size: 1.2rem;">➕</span> Add New Student
+    </button>
+</div>
+
+<!-- All Students Table -->
+<div class="card-modern">
+    <div class="card-body">
+        {% if all_students %}
+        <div class="table-responsive">
+            <table class="data-table-modern">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Gender</th>
+                        <th>Room</th>
+                        <th>Pending Fees</th>
+                        <th>Mess</th>
+                        <th>Email</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in all_students %}
+                    <tr>
+                        <td><strong style="color: #667eea;">{{ student.Student_ID }}</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                                    {{ student.FirstName[0] }}{{ student.LastName[0] }}
+                                </div>
+                                <strong>{{ student.FirstName }} {{ student.LastName }}</strong>
+                            </div>
+                        </td>
+                        <td><span class="badge-modern badge-info">{{ student.Department }}</span></td>
+                        <td>{{ 'Male' if student.Sex == 'M' else 'Female' }}</td>
+                        <td>
+                            {% if student.Room_no %}
+                                <span class="badge-modern badge-success">🏠 {{ student.Room_no }}</span>
+                            {% else %}
+                                <span class="badge-modern badge-warning">⚠️ Not Assigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if student.PendingFees > 0 %}
+                                <span class="badge-modern badge-danger">💰 ₹{{ "%.2f"|format(student.PendingFees) }}</span>
+                            {% else %}
+                                <span class="badge-modern badge-success">✓ ₹0.00</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ student.MessName or 'N/A' }}</td>
+                        <td style="font-size: 0.85rem; color: #64748b;">{{ student.Email }}</td>
+                        <td style="white-space: nowrap; text-align: center;">
+                            <button class="btn-action btn-action-primary" 
+                                    onclick="openAllocateRoomModal(
+                                        {{ student.Student_ID }}, 
+                                        '{{ student.FirstName }}', 
+                                        '{{ student.LastName }}'
+                                    )"
+                                    title="{% if student.Room_no %}Change Room{% else %}Allocate Room{% endif %}">
+                                🏠
+                            </button>
+                            <button class="btn-action btn-action-danger" 
+                                    onclick="confirmDelete({{ student.Student_ID }}, '{{ student.FirstName }}', '{{ student.LastName }}')"
+                                    title="Delete Student">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;">👨‍🎓</div>
+            <p style="color: #64748b; font-size: 1.1rem;">No students found</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div id="addStudentModal" class="modal-modern" style="display:none;">
+    <div class="modal-content-modern" style="max-width: 650px;">
+        <span class="close-button-modern" onclick="closeAddStudentModal()">&times;</span>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem;">👨‍🎓</div>
+            <h2 style="font-size: 2rem; font-weight: 700; color: #1e293b;">Add New Student</h2>
+            <p style="color: #64748b;">Fill in the student information below</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('admin.add_student') }}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="student_id" class="form-label-modern">Student ID *</label>
+                    <input type="number" id="student_id" name="student_id" class="form-control-modern" required>
+                </div>
+                <div class="form-group">
+                    <label for="department" class="form-label-modern">Department *</label>
+                    <select id="department" name="department" class="form-control-modern" required>
+                        <option value="CSE">CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="MECH">MECH</option>
+                        <option value="CIVIL">CIVIL</option>
+                        <option value="IT">IT</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name" class="form-label-modern">First Name *</label>
+                    <input type="text" id="first_name" name="first_name" class="form-control-modern" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name" class="form-label-modern">Last Name *</label>
+                    <input type="text" id="last_name" name="last_name" class="form-control-modern" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="sex" class="form-label-modern">Gender *</label>
+                    <select id="sex" name="sex" class="form-control-modern" required>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="phone" class="form-label-modern">Phone Number</label>
+                    <input type="text" id="phone" name="phone" class="form-control-modern" placeholder="Optional">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label-modern">Email *</label>
+                <input type="email" id="email" name="email" class="form-control-modern" required>
+            </div>
+
+            <div class="form-group">
+                <label for="mess_id" class="form-label-modern">Assign Mess *</label>
+                <select id="mess_id" name="mess_id" class="form-control-modern" required>
+                    {% for mess in available_mess %}
+                    <option value="{{ mess.Mess_ID }}">
+                        {{ mess.Name }} ({{ mess.Type }}) - ₹{{ "%.2f"|format(mess.Fees) }}/month
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn-modern btn-modern-primary" style="width: 100%; margin-top: 20px; padding: 15px;">
+                Add Student
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Allocate Room Modal -->
+<div id="allocateRoomModal" class="modal-modern" style="display:none;">
+    <div class="modal-content-modern">
+        <span class="close-button-modern" onclick="closeAllocateRoomModal()">&times;</span>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem;">🏠</div>
+            <h2 style="font-size: 2rem; font-weight: 700; color: #1e293b;">Allocate Room</h2>
+            <p style="color: #64748b;">Allocating room for: <strong id="studentName"></strong></p>
+        </div>
+
+        <form method="POST" id="allocateRoomForm">
+            <input type="hidden" name="student_id" id="modalStudentId">
+            
+            <div class="form-group">
+                <label for="room_id" class="form-label-modern">Select Room *</label>
+                <select id="room_id" name="room_id" class="form-control-modern" required style="font-family: 'Courier New', monospace;">
+                    {% for room in available_rooms %}
+                    <option value="{{ room.Room_ID }}">
+                        {{ room.Room_no }} | 
+                        Occupancy: {{ room.CurrentOccupancy }}/{{ room.Capacity }}
+                        {% if room.Status == 'Under Maintenance' %}
+                            | [🔧 Maintenance]
+                        {% elif room.CurrentOccupancy >= room.Capacity %}
+                            | [🔴 FULL - WILL TRIGGER ERROR]
+                        {% elif room.CurrentOccupancy > 0 %}
+                            | [🟡 Partially Full]
+                        {% else %}
+                            | [🟢 Empty]
+                        {% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div class="info-box-modern">
+                    <strong>💡 Demo Instructions:</strong>
+                    <ul style="margin: 8px 0 0 20px; font-size: 0.9rem;">
+                        <li>Select a room marked <strong>[🔴 FULL]</strong> to see the trigger fire</li>
+                        <li>The database trigger will prevent allocation and show an error message</li>
+                        <li>Select a room with available space for successful allocation</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="allocation_date" class="form-label-modern">Allocation Date *</label>
+                <input type="date" id="allocation_date" name="allocation_date" class="form-control-modern" required>
+            </div>
+            
+            <button type="submit" class="btn-modern btn-modern-primary" style="width: 100%; padding: 15px; font-size: 1.1rem;">
+                Confirm Allocation
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="modal-modern" style="display:none;">
+    <div class="modal-content-modern" style="max-width: 500px;">
+        <span class="close-button-modern" onclick="closeDeleteModal()">&times;</span>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem;">⚠️</div>
+            <h2 style="font-size: 2rem; font-weight: 700; color: #ef4444;">Confirm Deletion</h2>
+            <p style="margin: 20px 0; color: #64748b;">Are you sure you want to delete student:</p>
+            <p style="font-size: 1.3rem; font-weight: bold; margin: 10px 0; color: #1e293b;" id="deleteStudentName"></p>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
+                This action cannot be undone. All related records will also be deleted.
+            </p>
+        </div>
+        <form method="POST" id="deleteStudentForm" style="display: flex; gap: 15px;">
+            <button type="button" onclick="closeDeleteModal()" class="btn-modern btn-modern-secondary" style="flex: 1; padding: 15px;">
+                Cancel
+            </button>
+            <button type="submit" class="btn-modern" style="flex: 1; padding: 15px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                Yes, Delete
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Modern Stat Cards */
+.stat-card-modern {
+    padding: 30px;
+    border-radius: 16px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.stat-card-modern:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* Modern Card */
+.card-modern {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Modern Table */
+.data-table-modern {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.data-table-modern thead tr {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.data-table-modern th {
+    padding: 18px 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.data-table-modern th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.data-table-modern th:last-child {
+    border-top-right-radius: 12px;
+}
+
+.data-table-modern tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table-modern tbody tr:hover {
+    background: linear-gradient(90deg, #f8fafc 0%, #eff6ff 100%);
+    transform: scale(1.01);
+}
+
+.data-table-modern td {
+    padding: 18px 15px;
+    font-size: 0.95rem;
+}
+
+/* Modern Badges */
+.badge-modern {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.badge-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+/* Modern Buttons */
+.btn-modern {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-modern-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-modern-secondary {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    color: white;
+}
+
+/* Action Buttons */
+.btn-action {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin: 0 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    transform: scale(1.15);
+}
+
+.btn-action-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.btn-action-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+/* Modern Modal */
+.modal-modern {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content-modern {
+    background: white;
+    margin: 50px auto;
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 550px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease-out;
+}
+
+.close-button-modern {
+    color: #94a3b8;
+    float: right;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 20px;
+    transition: color 0.2s;
+}
+
+.close-button-modern:hover {
+    color: #1e293b;
+}
+
+/* Modern Form Elements */
+.form-label-modern {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: #1e293b;
+}
+
+.form-control-modern {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.form-control-modern:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    outline: none;
+    background: white;
+}
+
+.info-box-modern {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #fbbf24;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+    color: #92400e;
+}
+
+/* Alert Improvements */
+.alert {
+    border-width: 2px;
+    border-style: solid;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+    color: #991b1b !important;
+    border-color: #f87171 !important;
+    font-weight: 600;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+    color: #065f46 !important;
+    border-color: #34d399 !important;
+    font-weight: 600;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Set today's date as default
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        const allocationDateInput = document.getElementById('allocation_date');
+        if (allocationDateInput) {
+            allocationDateInput.value = today;
+        }
+
+        // Auto-scroll to flash messages if they exist
+        const alerts = document.querySelectorAll('.alert');
+        if (alerts.length > 0) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Auto-dismiss after 10 seconds
+            setTimeout(() => {
+                alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 10000);
+        }
+    });
+
+    const allocateModal = document.getElementById("allocateRoomModal");
+    const addStudentModal = document.getElementById("addStudentModal");
+    const deleteConfirmModal = document.getElementById("deleteConfirmModal");
+    
+    function openAddStudentModal() {
+        addStudentModal.style.display = "block";
+    }
+
+    function closeAddStudentModal() {
+        addStudentModal.style.display = "none";
+    }
+
+    function openAllocateRoomModal(studentId, firstName, lastName) {
+        document.getElementById('modalStudentId').value = studentId;
+        document.getElementById('studentName').textContent = firstName + ' ' + lastName;
+        
+        const form = document.getElementById("allocateRoomForm");
+        form.action = "{{ url_for('admin.allocate_room', student_id=0) }}".replace('0', studentId);
+        
+        allocateModal.style.display = "block";
+    }
+
+    function closeAllocateRoomModal() {
+        allocateModal.style.display = "none";
+    }
+
+    function confirmDelete(studentId, firstName, lastName) {
+        document.getElementById('deleteStudentName').textContent = firstName + ' ' + lastName + ' (ID: ' + studentId + ')';
+        
+        const form = document.getElementById("deleteStudentForm");
+        form.action = "{{ url_for('admin.delete_student', student_id=0) }}".replace('0', studentId);
+        
+        deleteConfirmModal.style.display = "block";
+    }
+
+    function closeDeleteModal() {
+        deleteConfirmModal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == allocateModal) {
+            closeAllocateRoomModal();
+        }
+        if (event.target == addStudentModal) {
+            closeAddStudentModal();
+        }
+        if (event.target == deleteConfirmModal) {
+            closeDeleteModal();
+        }
+    }
+</script>
+{% endblock %}

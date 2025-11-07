@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Manage Students{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Student Management</h1>
+    <div class="header-actions">
+        <a href="{{ url_for('admin.add_student') }}" class="btn btn-secondary">➕ Add New Student</a>
+        
+        <form method="GET" class="search-form" style="display: inline-flex; margin-left: 10px;">
+            <input type="text" name="search" placeholder="Search students..." 
+                   value="{{ request.args.get('search', '') }}" class="form-control">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if students %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Room</th>
+                        <th>Mess</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.Student_ID }}</td>
+                        <td>{{ student.FirstName }} {{ student.LastName }}</td>
+                        <td>{{ student.Department }}</td>
+                        <td>{{ student.Room_no or 'N/A' }}</td>
+                        <td>{{ student.MessName or 'N/A' }}</td>
+                        <td>{{ student.Email }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" 
+                                    onclick="openAllocateRoomModal(
+                                        {{ student.Student_ID }}, 
+                                        '{{ student.FirstName }}', 
+                                        '{{ student.LastName }}'
+                                    )">
+                                Allocate Room
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No students found</p>
+        {% endif %}
+    </div>
+</div>
+
+
+<div id="allocateRoomModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeAllocateRoomModal()">&times;</span>
+        <h2>Allocate Room</h2>
+        <p>Allocating room for: <strong id="studentName"></strong></p>
+
+        <form method="POST" id="allocateRoomForm">
+            <input type="hidden" name="student_id" id="modalStudentId">
+            
+            <div class="form-group">
+                <label for="room_id">New Room ID (e.g., 6)</label>
+                <input type="number" id="room_id" name="room_id" class="form-control" placeholder="Enter Room ID" required min="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="allocation_date">Allocation Date</label>
+                <input type="date" id="allocation_date" name="allocation_date" class="form-control" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Confirm Allocation</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Set today's date as default
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        const allocationDateInput = document.getElementById('allocation_date');
+        if (allocationDateInput) {
+            allocationDateInput.value = today;
+        }
+    });
+
+    const modal = document.getElementById("allocateRoomModal");
+    
+    // FUNCTION TO OPEN THE MODAL (Takes first and last name separately for safety)
+    function openAllocateRoomModal(studentId, firstName, lastName) {
+        document.getElementById('modalStudentId').value = studentId;
+        // Combine names safely in JavaScript
+        document.getElementById('studentName').textContent = firstName + ' ' + lastName; 
+        
+        // Dynamically set the form action URL
+        const form = document.getElementById("allocateRoomForm");
+        // Use the Flask route to define the action URL
+        form.action = "{{ url_for('admin.allocate_room', student_id=0) }}".replace('0', studentId);
+        
+        modal.style.display = "block";
+    }
+
+    // FUNCTION TO CLOSE THE MODAL
+    function closeAllocateRoomModal() {
+        modal.style.display = "none";
+    }
+
+    // Close modal when user clicks anywhere outside of the modal
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeAllocateRoomModal();
+        }
+    }
+</script>
+{% endblock %}

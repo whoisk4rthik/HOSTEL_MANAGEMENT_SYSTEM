@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hostel Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>🏢 Hostel Management</h2>
+            </div>
+            <div class="nav-menu">
+                {% if session.user_id %}
+                    <span class="nav-user">👤 {{ session.user_name }}</span>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">Logout</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}
+    
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="message-container-wrapper">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if session.user_id %}
+        
+            <div class="layout">
+                <aside class="sidebar">
+                    <div class="sidebar-header">
+                        <h3>{% if session.user_type == 'student' %}Student{% else %}Admin{% endif %} Panel</h3>
+                    </div>
+                    <ul class="sidebar-menu">
+                        {% if session.user_type == 'student' %}
+                            <li><a href="{{ url_for('student.dashboard') }}" class="{% if request.endpoint == 'student.dashboard' %}active{% endif %}">📊 Dashboard</a></li>
+                            <li><a href="{{ url_for('student.profile') }}" class="{% if request.endpoint == 'student.profile' %}active{% endif %}">👤 Profile</a></li>
+                            <li><a href="{{ url_for('student.room') }}" class="{% if request.endpoint == 'student.room' %}active{% endif %}">🏠 My Room</a></li>
+                            <li><a href="{{ url_for('student.mess') }}" class="{% if request.endpoint == 'student.mess' %}active{% endif %}">🍽️ Mess</a></li>
+                            <li><a href="{{ url_for('student.fees') }}" class="{% if request.endpoint == 'student.fees' %}active{% endif %}">💰 Fees</a></li>
+                            <li><a href="{{ url_for('student.visitors') }}" class="{% if request.endpoint == 'student.visitors' %}active{% endif %}">👥 Visitors</a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}">📊 Dashboard</a></li>
+                            <li><a href="{{ url_for('admin.students') }}" class="{% if request.endpoint == 'admin.students' %}active{% endif %}">👨‍🎓 Students</a></li>
+                            <li><a href="{{ url_for('admin.rooms') }}" class="{% if request.endpoint == 'admin.rooms' %}active{% endif %}">🏢 Rooms</a></li>
+                            <li><a href="{{ url_for('admin.mess') }}" class="{% if request.endpoint == 'admin.mess' %}active{% endif %}">🍴 Mess</a></li>
+                            <li><a href="{{ url_for('admin.fees') }}" class="{% if request.endpoint == 'admin.fees' %}active{% endif %}">💵 Fees</a></li>
+                        {% endif %}
+                    </ul>
+                </aside>
+                <main class="main-content">
+                    {{ self.content() }} 
+                </main>
+            </div>
+            
+        {% else %}
+        
+            <main class="main-content-full">
+                {{ self.content() }} 
+            </main>
+            
+        {% endif %}
+    
+    {% endblock %} 
+
+    <footer class="footer">
+        <p>&copy; 2025 Hostel Management System. All rights reserved.</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

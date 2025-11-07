@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}My Room{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Room Details</h1>
+</div>
+
+<div class="section-grid">
+    <div class="card">
+        <div class="card-header">
+            <h3>Current Room</h3>
+        </div>
+        <div class="card-body">
+            {% if room %}
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Room Number</label>
+                    <p class="highlight">{{ room.Room_no }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Capacity</label>
+                    <p>{{ room.Capacity }} persons</p>
+                </div>
+                <div class="info-item">
+                    <label>Status</label>
+                    <p><span class="badge badge-{{ room.Status|lower|replace(' ', '-') }}">{{ room.Status }}</span></p>
+                </div>
+                <div class="info-item">
+                    <label>Warden</label>
+                    <p>{{ room.WardenName }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Warden Contact</label>
+                    <p>📞 {{ room.WardenPhone }}</p>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted">No room assigned yet</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Roommates</h3>
+        </div>
+        <div class="card-body">
+            {% if roommates %}
+            <ul class="roommate-list">
+                {% for roommate in roommates %}
+                <li class="roommate-item">
+                    <div class="roommate-avatar">👤</div>
+                    <div class="roommate-info">
+                        <strong>{{ roommate.FirstName }} {{ roommate.LastName }}</strong>
+                        <p>{{ roommate.Department }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">No roommates</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Allocation History</h3>
+    </div>
+    <div class="card-body">
+        {% if history %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Room Number</th>
+                    <th>Allocation Date</th>
+                    <th>Vacate Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for alloc in history %}
+                <tr>
+                    <td>{{ alloc.Room_no }}</td>
+                    <td>{{ alloc.AllocationDate }}</td>
+                    <td>{{ alloc.VacateDate or 'Current' }}</td>
+                    <td>
+                        {% if alloc.VacateDate %}
+                        <span class="badge badge-secondary">Past</span>
+                        {% else %}
+                        <span class="badge badge-success">Active</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No allocation history</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

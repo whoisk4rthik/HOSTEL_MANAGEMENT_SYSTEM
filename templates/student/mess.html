@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Mess Selection{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Mess Management</h1>
+</div>
+
+{% if current_mess %}
+<div class="card current-mess-card">
+    <div class="card-header">
+        <h3>Your Current Mess</h3>
+    </div>
+    <div class="card-body">
+        <div class="mess-details">
+            <h2>{{ current_mess.Name }}</h2>
+            <div class="mess-info-grid">
+                <div class="mess-info-item">
+                    <span class="label">Type:</span>
+                    <span class="value">{{ current_mess.Type }}</span>
+                </div>
+                <div class="mess-info-item">
+                    <span class="label">Monthly Fees:</span>
+                    <span class="value">₹{{ "%.2f"|format(current_mess.Fees) }}</span>
+                </div>
+                <div class="mess-info-item">
+                    <span class="label">Capacity:</span>
+                    <span class="value">{{ current_mess.Capacity }} students</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h3>Available Mess Options</h3>
+    </div>
+    <div class="card-body">
+        <div class="mess-grid">
+            {% for mess in all_mess %}
+            <div class="mess-card {% if current_mess and mess.Mess_ID == current_mess.Mess_ID %}active-mess{% endif %}">
+                <h4>{{ mess.Name }}</h4>
+                <p class="mess-type">{{ mess.Type }}</p>
+                <p class="mess-fees">₹{{ "%.2f"|format(mess.Fees) }}/month</p>
+                <p class="mess-capacity">Capacity: {{ mess.Capacity }}</p>
+                
+                {% if not current_mess or mess.Mess_ID != current_mess.Mess_ID %}
+                <form method="POST" style="margin-top: 10px;">
+                    <input type="hidden" name="mess_id" value="{{ mess.Mess_ID }}">
+                    <button type="submit" class="btn btn-primary btn-sm btn-block">Select This Mess</button>
+                </form>
+                {% else %}
+                <button class="btn btn-success btn-sm btn-block" disabled>Current Selection ✓</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

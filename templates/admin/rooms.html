@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Manage Rooms{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Room Management</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Room No</th>
+                        <th>Capacity</th>
+                        <th>Occupancy</th>
+                        <th>Status</th>
+                        <th>Warden</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for room in rooms %}
+                    <tr>
+                        <td>{{ room.Room_ID }}</td>
+                        <td><span class="highlight">{{ room.Room_no }}</span></td>
+                        <td>{{ room.Capacity }}</td>
+                        <td>{{ room.CurrentOccupancy }}</td>
+                        <td><span class="badge badge-{{ room.Status|lower|replace(' ', '-') }}">{{ room.Status }}</span></td>
+                        <td>{{ room.WardenName }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

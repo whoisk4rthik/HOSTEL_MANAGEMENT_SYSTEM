@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Profile</h1>
+</div>
+
+<div class="profile-container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Personal Information</h3>
+        </div>
+        <div class="card-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Student ID</label>
+                    <p>{{ student.Student_ID }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Full Name</label>
+                    <p>{{ student.FirstName }} {{ student.LastName }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Department</label>
+                    <p>{{ student.Department }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Gender</label>
+                    <p>{{ 'Male' if student.Sex == 'M' else 'Female' }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Email</label>
+                    <p>{{ student.Email }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Room Number</label>
+                    <p>{{ student.Room_no or 'Not Assigned' }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Mess</label>
+                    <p>{{ student.MessName or 'Not Selected' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Contact Numbers</h3>
+        </div>
+        <div class="card-body">
+            {% if phones %}
+            <ul class="phone-list">
+                {% for phone in phones %}
+                <li>📱 {{ phone.Ph_no }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">No phone numbers registered</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

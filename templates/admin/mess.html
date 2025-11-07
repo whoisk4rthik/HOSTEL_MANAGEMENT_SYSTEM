@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Manage Mess{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Mess Management</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Fees (Monthly)</th>
+                        <th>Capacity</th>
+                        <th>Current Students</th>
+                        <th>Managed By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mess in mess_list %}
+                    <tr>
+                        <td>{{ mess.Mess_ID }}</td>
+                        <td><span class="highlight">{{ mess.Name }}</span></td>
+                        <td>{{ mess.Type }}</td>
+                        <td>₹{{ "%.2f"|format(mess.Fees) }}</td>
+                        <td>{{ mess.Capacity }}</td>
+                        <td>{{ mess.CurrentStudents }}</td>
+                        <td>{{ mess.WardenName }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
